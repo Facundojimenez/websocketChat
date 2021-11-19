@@ -24,93 +24,9 @@
     "id": 4
   },
   {
-    "title": "prodNuevo",
-    "price": 100,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 6
-  },
-  {
-    "title": "productosPostman",
-    "price": 150,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 7
-  },
-  {
-    "title": "productosPostman2",
-    "price": 150,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 8
-  },
-  {
-    "title": "productosPostman2",
-    "price": 150,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 10
-  },
-  {
-    "title": "X",
-    "price": 150,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 11
-  },
-  {
-    "title": "sdsd",
-    "price": 600,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 12
-  },
-  {
-    "title": "productosPostman2",
-    "price": 150,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 13
-  },
-  {
-    "title": "Prod Form",
-    "price": 1000,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 14
-  },
-  {
-    "title": "bootstrap product",
-    "price": 100,
-    "id": 15,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg"
-  },
-  {
-    "title": "bootstrap product",
-    "price": 100,
-    "id": 15,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg"
-  },
-  {
-    "title": "cable",
     "price": 200,
-    "thumbnail": "http://cdn.shopify.com/s/files/1/0271/1047/3866/products/41-ALEXCABLE_1_1200x1200.png?v=1627753563",
-    "id": 16
-  },
-  {
-    "title": "productosPostman2",
-    "price": 150,
+    "title": "Producto X",
     "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 17
-  },
-  {
-    "title": "",
-    "price": null,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 18
-  },
-  {
-    "title": "",
-    "price": null,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 19
-  },
-  {
-    "title": "",
-    "price": null,
-    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
-    "id": 20
+    "id": 5
   }
 ]

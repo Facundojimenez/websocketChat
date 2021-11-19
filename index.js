@@ -28,33 +28,48 @@ app.use("/api/productos", productosRoutes);
 
 io.on("connection", async (socket) => {
     console.log("Cliente conectado");
+    //carga inicial de la pagina
     const listaMensajes = await ContenedorMensajes.getAll();
+    const listaProductos = await ContenedorProd.getAll();
     socket.emit("mensajeDesdeServer", listaMensajes); ///carga inicial del chat
+    socket.emit("productoDesdeServer", listaProductos);
 
-    ///proceso el mensaje del cliente
+    ///guardo el mensaje del cliente
     socket.on("mensajeDesdeCliente", async (data) =>{
-        const fecha = moment().format("DD/MM/YYYY, HH:mm:ss");        
-        await ContenedorMensajes.save({timestamp: fecha, ...data});
+        const mensajeSave = {
+            ...data,
+            timestamp: moment().format("DD/MM/YYYY, HH:mm:ss")
+        } 
+
+        await ContenedorMensajes.save(mensajeSave);
         const listaMensajes = await ContenedorMensajes.getAll();
         io.sockets.emit("mensajeDesdeServer", listaMensajes);
     } )
+
+    ///guardo el producto
+    socket.on("productoDesdeCliente", async (data) => {
+        const productoSave = {
+            ...data,
+            price: parseInt(data.price)   
+        }
+        if(!productoSave.thumbnail){
+            productoSave.thumbnail = "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg"
+        }
+        
+        await ContenedorProd.save(productoSave);
+        const listaProductos = await ContenedorProd.getAll();
+
+
+        io.sockets.emit("productoDesdeServer", listaProductos);
+    })
     
 })
 
 /// --- Rutas ---
 
-app.get("/", (req, res) => {
-    res.render("index", {seccion: "form"});
+app.get("/", async (req, res) => {
+    res.render("index");
 });
-
-app.get("/productos", async (req, res) => {
-    const productos = await ContenedorProd.getAll();
-    res.render("index", {seccion: "productos", data: productos});
-});
-
-app.get("/chat", (req, res) => {
-    res.render("index", {seccion: "chat"})
-})
 
 /// --- Inicio del server
 
