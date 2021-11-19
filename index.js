@@ -10,7 +10,7 @@ const ContenedorMensajes = new Contenedor("./chats.json");
 const app = express();
 const server = http.createServer(app);
 const io = require("socket.io")(server);
-const port = process.env.port || 3001;
+const port = process.env.PORT || 3001;
 
 /// --- Handlebars config ---
 
