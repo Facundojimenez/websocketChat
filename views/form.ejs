@@ -1,0 +1,17 @@
+<h1 class="col-12 my-5 text-center display-2">Form para cargar productos</h1>
+<form class="col-7 bg-white p-4 mx-auto border" action="/api/productos" method="POST">
+    <div class="form-group">
+        <label>Nombre</label>
+        <input class="form-control" type="text" name="title" >
+    </div>
+    <div class="form-group">
+        <label>Precio</label>
+        <input type="number" class="form-control" name="price">
+    </div>
+    <div class="form-group">
+        <label>URL Imagen (opcional)</label>
+        <input type="text" class="form-control" name="thumbnail">
+    </div>
+    <button type="submit" class="btn btn-primary">Cargar Producto</button>
+</form>
+<%- include('./chat'); %>

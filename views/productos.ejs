@@ -1,0 +1,10 @@
+<h1 class="col-12 my-5 text-center display-1">Productos</h1>
+<% data.forEach(function(producto) { %>
+<div class="card col-4 my-1">
+    <img src="<%= producto.thumbnail %>" class="card-img-top" alt="producto-generico">
+    <div class="ard-body">
+        <h5 class="card-title"><%= producto.title %></h5>
+        <p class="card-text"><%= producto.price%></p>
+    </div>
+</div>
+<% }) %>

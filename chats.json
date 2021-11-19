@@ -1,0 +1,32 @@
+[
+  {
+    "timestamp": "19/11/2021, 09:27:36",
+    "userEmail": "gonza",
+    "message": "holaa",
+    "id": 1
+  },
+  {
+    "timestamp": "19/11/2021, 09:27:39",
+    "userEmail": "gonza",
+    "message": "todo bien?",
+    "id": 2
+  },
+  {
+    "timestamp": "19/11/2021, 09:27:44",
+    "userEmail": "facu",
+    "message": "sii y vos?",
+    "id": 3
+  },
+  {
+    "timestamp": "19/11/2021, 09:27:59",
+    "userEmail": "gonza",
+    "message": "bienn todo tranqui",
+    "id": 4
+  },
+  {
+    "timestamp": "19/11/2021, 09:28:22",
+    "userEmail": "martin",
+    "message": "holaa",
+    "id": 5
+  }
+]
