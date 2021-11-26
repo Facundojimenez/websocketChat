@@ -28,5 +28,17 @@
     "title": "Producto X",
     "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
     "id": 5
+  },
+  {
+    "price": 2,
+    "title": "sd",
+    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
+    "id": 6
+  },
+  {
+    "price": null,
+    "title": "",
+    "thumbnail": "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg",
+    "id": 7
   }
 ]

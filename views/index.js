@@ -13,7 +13,6 @@ socket.on("productoDesdeServer", (data) => {
 })
 
 const sendProducto = () => {
-    console.log("prod enviado")
     const objProducto = {
         price: document.querySelector("#price").value,
         title: document.querySelector("#title").value,
@@ -32,8 +31,8 @@ const sendProducto = () => {
 const sendMessage = () => {
     
     const objMessage = {
-        userEmail: userEmail,
-        message: document.querySelector("#message").value
+        email_usuario: userEmail,
+        mensaje: document.querySelector("#message").value
     };
     document.querySelector("#message").value = "";
     socket.emit("mensajeDesdeCliente", objMessage);
@@ -61,18 +60,18 @@ const renderProductos = (data) => {
 const renderMensajes = (data) => {
 
     const htmlMsg = data.map(msg => {
-        if(userEmail === msg.userEmail){
+        if(userEmail === msg.email_usuario){
             return `
                 <div class="w-75 align-self-end border rounded bg-primary text-white my-2 p-2" >
-                    <p class="h5"> Tú: ${msg.message}</p>
-                    <p class="text-right m-0 p-0"> ${msg.timestamp}</p>
+                    <p class="h5"> Tú: ${msg.mensaje}</p>
+                    <p class="text-right m-0 p-0"> ${moment(msg.fecha).format("DD/MM/YYYY HH:mm")}</p>
                     </div>
                     `
                 }
                 return `
                 <div class="w-75 border rounded bg-info text-white my-2 p-2" >
-                    <p class="h5"> ${msg.userEmail}: ${msg.message}</p>
-                    <p class="m-0 p-0"> ${msg.timestamp}</p>
+                    <p class="h5"> ${msg.email_usuario}: ${msg.mensaje}</p>
+                    <p class="m-0 p-0"> ${moment(msg.fecha).format("DD/MM/YYYY HH:mm")}</p>
                 </div>
         `
     }).join(" ")
@@ -83,3 +82,4 @@ const renderMensajes = (data) => {
     const element = document.querySelector('#cajaMensajes');
     element.scrollTop = element.scrollHeight;
 }
+

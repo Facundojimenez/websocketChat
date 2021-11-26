@@ -1,8 +1,14 @@
 const express = require("express");
-const moment = require('moment');
 const http = require('http');
 const productosRoutes = require("./routes/productos");
 const Contenedor = require("./contenedor");
+
+
+///DB
+const ContenedorDB = require("./contenedorDB");
+const knex = require("./db/knex");
+const ContenedorProductosDB = new ContenedorDB(knex, "productos");
+const ContenedorMensajesDB = new ContenedorDB(knex, "mensajes");
 
 
 const ContenedorProd = new Contenedor("./productos.txt");
@@ -10,9 +16,9 @@ const ContenedorMensajes = new Contenedor("./chats.json");
 const app = express();
 const server = http.createServer(app);
 const io = require("socket.io")(server);
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
-/// --- Handlebars config ---
+/// --- EJS config ---
 
 app.set("views", "./views");
 app.set("view engine", "ejs");
@@ -29,20 +35,19 @@ app.use("/api/productos", productosRoutes);
 io.on("connection", async (socket) => {
     console.log("Cliente conectado");
     //carga inicial de la pagina
-    const listaMensajes = await ContenedorMensajes.getAll();
-    const listaProductos = await ContenedorProd.getAll();
+    let listaMensajes = await ContenedorMensajesDB.getAll();
+    const listaProductos = await ContenedorProductosDB.getAll();
     socket.emit("mensajeDesdeServer", listaMensajes); ///carga inicial del chat
     socket.emit("productoDesdeServer", listaProductos);
 
     ///guardo el mensaje del cliente
     socket.on("mensajeDesdeCliente", async (data) =>{
         const mensajeSave = {
-            ...data,
-            timestamp: moment().format("DD/MM/YYYY, HH:mm:ss")
+            ...data
         } 
 
-        await ContenedorMensajes.save(mensajeSave);
-        const listaMensajes = await ContenedorMensajes.getAll();
+        await ContenedorMensajesDB.save(mensajeSave);
+        const listaMensajes = await ContenedorMensajesDB.getAll();
         io.sockets.emit("mensajeDesdeServer", listaMensajes);
     } )
 
@@ -56,8 +61,8 @@ io.on("connection", async (socket) => {
             productoSave.thumbnail = "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg"
         }
         
-        await ContenedorProd.save(productoSave);
-        const listaProductos = await ContenedorProd.getAll();
+        await ContenedorProductosDB.save(productoSave);
+        const listaProductos = await ContenedorProductosDB.getAll();
 
 
         io.sockets.emit("productoDesdeServer", listaProductos);

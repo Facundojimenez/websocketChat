@@ -6,9 +6,21 @@ const router = Router();
 const ContenedorProd = new Contenedor("./productos.txt");
 router.use(express.json());
 
+///DB
+const ContenedorDB = require("../contenedorDB");
+const knex = require("../db/knex");
+const ContenedorProductosDB = new ContenedorDB(knex, "productos");
+
+
 ///Devuelve todos los productos
 router.get("/", async (req, res) => {
-    const productos = await ContenedorProd.getAll();
+    const productos = await ContenedorProductosDB.getAll();
+
+    if(!productos){
+        res.sendStatus(404);
+        return;
+    }
+
     res.json(productos);
 })
 
@@ -17,38 +29,58 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
     const productoSave = {
         ...req.body,
-        price: parseInt(req.body.price)   
+        price: req.body.price   
     }
     if(!productoSave.thumbnail){
         productoSave.thumbnail = "https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg"
     }
     
-    console.log(productoSave)
-    const id = await ContenedorProd.save(productoSave);
+    const id = await ContenedorProductosDB.save(productoSave);
     res.redirect("/");
 })
 
 router.put("/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
     const productoUpdate = {
-        id: id,
+        id: parseInt(req.params.id),
         ...req.body
     }
-    const respuesta = await ContenedorProd.updateProductById(productoUpdate);
+
+    ///BUSCO EL PRODUCTO ANTES DE ACTUALIZAR
+    const producto = await ContenedorProductosDB.getById(productoUpdate.id);
+    if(!producto){
+        res.sendStatus(404);
+        return;
+    }
+
+    const respuesta = await ContenedorProductosDB.updateProductById(productoUpdate);
     res.json(respuesta);
 })
 
 
 router.delete("/:id", async (req, res) =>{
     const id = parseInt(req.params.id);
-    const respuesta = await ContenedorProd.deleteById(id);
-    res.json(respuesta);
+    const response = await ContenedorProductosDB.deleteById(parseInt(id));
+
+    if(!response){
+        res.sendStatus(404);
+        return;
+    }
+    res.json({ 
+        code: 200,
+        status: "Elemento eliminado correctamente"
+    });
 })
 
 ///Devuelve un producto por ID 
 router.get("/:id", async (req, res) => {
     const id = parseInt(req.params.id);
-    const producto = await ContenedorProd.getById(id);
+    const producto = await ContenedorProductosDB.getById(id);
+
+    if(!producto){
+        res.sendStatus(404);
+        return;
+    }
+
     res.json(producto);
 })
 
