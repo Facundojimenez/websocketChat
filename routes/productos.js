@@ -3,13 +3,12 @@ const {Router} = express;
 const Contenedor = require("../contenedor")
 const router = Router();
 
-const ContenedorProd = new Contenedor("./productos.txt");
 router.use(express.json());
 
 ///DB
 const ContenedorDB = require("../contenedorDB");
-const knex = require("../db/knex");
-const ContenedorProductosDB = new ContenedorDB(knex, "productos");
+const mysql = require("../db/mysql");
+const ContenedorProductosDB = new ContenedorDB(mysql, "productos");
 
 
 ///Devuelve todos los productos

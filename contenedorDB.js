@@ -12,7 +12,7 @@ module.exports = class ContenedorDB {
     }
     async updateProductById(_elemento){
         const res = await this.knex(this.tabla)
-                    .where("id", 1)
+                    .where("id", _elemento.id)
                     .update(_elemento);
         return res;
     }

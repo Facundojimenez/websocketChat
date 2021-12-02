@@ -1,18 +1,15 @@
 const express = require("express");
 const http = require('http');
 const productosRoutes = require("./routes/productos");
-const Contenedor = require("./contenedor");
 
 
 ///DB
 const ContenedorDB = require("./contenedorDB");
-const knex = require("./db/knex");
-const ContenedorProductosDB = new ContenedorDB(knex, "productos");
-const ContenedorMensajesDB = new ContenedorDB(knex, "mensajes");
+const mysql = require("./db/mysql");
+const sqlite3 = require("./db/sqlite3");
+const ContenedorProductosDB = new ContenedorDB(mysql, "productos");
+const ContenedorMensajesDB = new ContenedorDB(sqlite3, "mensajes");
 
-
-const ContenedorProd = new Contenedor("./productos.txt");
-const ContenedorMensajes = new Contenedor("./chats.json");
 const app = express();
 const server = http.createServer(app);
 const io = require("socket.io")(server);
