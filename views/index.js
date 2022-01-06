@@ -1,5 +1,18 @@
 const socket = io();
 
+///esquemas de normalizacion
+const authorSchema = new normalizr.schema.Entity("author", {}, {idAttribute: "email"});
+
+const messageSchema = new normalizr.schema.Entity("message", {
+    author: authorSchema
+})
+
+const chatSchema = new normalizr.schema.Entity("chat", {
+    mensajes: [messageSchema]
+})
+///
+
+
 while(!userEmail){
     var userEmail = prompt("Ingrese su email para continuar");
 };
@@ -31,8 +44,10 @@ const sendProducto = () => {
 const sendMessage = () => {
     
     const objMessage = {
-        email_usuario: userEmail,
-        mensaje: document.querySelector("#message").value
+        author: {
+            email: userEmail
+        },
+        text: document.querySelector("#message").value
     };
     document.querySelector("#message").value = "";
     socket.emit("mensajeDesdeCliente", objMessage);
@@ -58,19 +73,21 @@ const renderProductos = (data) => {
 }
 
 const renderMensajes = (data) => {
-
-    const htmlMsg = data.map(msg => {
-        if(userEmail === msg.email_usuario){
+    console.log(data)
+    data = normalizr.denormalize("mensajes", chatSchema, data.entities)
+    console.log(data)
+    const htmlMsg = data.mensajes.map(msg => {
+        if(userEmail === msg.author.email){
             return `
                 <div class="w-75 align-self-end border rounded bg-primary text-white my-2 p-2" >
-                    <p class="h5"> Tú: ${msg.mensaje}</p>
+                    <p class="h5"> Tú: ${msg.text}</p>
                     <p class="text-right m-0 p-0"> ${moment(msg.fecha).format("DD/MM/YYYY HH:mm")}</p>
                     </div>
                     `
                 }
                 return `
                 <div class="w-75 border rounded bg-info text-white my-2 p-2" >
-                    <p class="h5"> ${msg.email_usuario}: ${msg.mensaje}</p>
+                    <p class="h5"> ${msg.author.email}: ${msg.text}</p>
                     <p class="m-0 p-0"> ${moment(msg.fecha).format("DD/MM/YYYY HH:mm")}</p>
                 </div>
         `

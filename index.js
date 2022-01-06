@@ -1,14 +1,30 @@
 const express = require("express");
 const http = require('http');
 const productosRoutes = require("./routes/productos");
+const {normalize, schema} = require("normalizr")
+var uuid = require('uuid');
+const faker = require("faker");
+
+/// --- Esquemas de normalizaciones ---
+const authorSchema = new schema.Entity("author", {}, {idAttribute: "email"});
+
+const messageSchema = new schema.Entity("message", {
+    author: authorSchema
+})
+
+const chatSchema = new schema.Entity("chat", {
+    mensajes: [messageSchema]
+})
 
 
-///DB
-const ContenedorDB = require("./contenedorDB");
+/// --- DB ---
+const ContenedorMensajesMongo = require("./contenedorMongo");
+const ContenedorProductosSQL = require("./contenedorDB");
 const mysql = require("./db/mysql");
-const sqlite3 = require("./db/sqlite3");
-const ContenedorProductosDB = new ContenedorDB(mysql, "productos");
-const ContenedorMensajesDB = new ContenedorDB(sqlite3, "mensajes");
+const messageModel = require("./models/messageModel")
+const ContenedorMensajesDB = new ContenedorMensajesMongo(messageModel);
+const ContenedorProductosDB = new ContenedorProductosSQL(mysql, "productos");
+
 
 const app = express();
 const server = http.createServer(app);
@@ -27,24 +43,37 @@ app.use(express.static("./views"));
 app.use("/api/productos", productosRoutes);
 
 
-/// WebSockets
+/// --- WebSockets
 
 io.on("connection", async (socket) => {
     console.log("Cliente conectado");
     //carga inicial de la pagina
     let listaMensajes = await ContenedorMensajesDB.getAll();
+    listaMensajes = listaMensajes.map(elem => {     ///le quito los atributos de mongoDB
+        return {author: elem.author, id:  elem.id, text: elem.text};
+    });
+    listaMensajes = {id: "mensajes", mensajes: listaMensajes}
+    listaMensajes = normalize(listaMensajes, chatSchema);
     const listaProductos = await ContenedorProductosDB.getAll();
+
+
     socket.emit("mensajeDesdeServer", listaMensajes); ///carga inicial del chat
     socket.emit("productoDesdeServer", listaProductos);
 
     ///guardo el mensaje del cliente
     socket.on("mensajeDesdeCliente", async (data) =>{
-        const mensajeSave = {
-            ...data
-        } 
 
+        const mensajeSave = new messageModel();
+        mensajeSave.overwrite({id: uuid.v4(), ...data})
         await ContenedorMensajesDB.save(mensajeSave);
-        const listaMensajes = await ContenedorMensajesDB.getAll();
+
+        let listaMensajes = await ContenedorMensajesDB.getAll();
+        listaMensajes = listaMensajes.map(elem => {     ///le quito los atributos de mongoDB
+            return {author: elem.author, id:  elem.id, text: elem.text};
+        });
+        listaMensajes = {id: "mensajes", mensajes: listaMensajes}
+        listaMensajes = normalize(listaMensajes, chatSchema);
+
         io.sockets.emit("mensajeDesdeServer", listaMensajes);
     } )
 
@@ -71,6 +100,21 @@ io.on("connection", async (socket) => {
 
 app.get("/", async (req, res) => {
     res.render("index");
+});
+
+app.get("/api/productos-test", async (req, res) => {
+    const productos = [];
+    for(let i = 0; i < 5; i++){
+        productos.push({
+            title: faker.commerce.productName(),
+            price: faker.commerce.price(),
+            thumbnail: faker.image.image(), ///las otras opciones de imagenes de faker no funcionan muy bien, asi que preferi usar imagenes aleatorias
+        })
+    }
+    console.log(productos)
+
+    // const productos = await ContenedorProd.getAll();
+    res.render("index", {seccion: "productos", data: productos});
 });
 
 /// --- Inicio del server
