@@ -1,9 +1,13 @@
 const express = require("express");
 const http = require('http');
 const productosRoutes = require("./routes/productos");
-const {normalize, schema} = require("normalizr")
+const {normalize, schema} = require("normalizr");
 var uuid = require('uuid');
 const faker = require("faker");
+
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 
 /// --- Esquemas de normalizaciones ---
 const authorSchema = new schema.Entity("author", {}, {idAttribute: "email"});
@@ -21,7 +25,7 @@ const chatSchema = new schema.Entity("chat", {
 const ContenedorMensajesMongo = require("./contenedorMongo");
 const ContenedorProductosSQL = require("./contenedorDB");
 const mysql = require("./db/mysql");
-const messageModel = require("./models/messageModel")
+const messageModel = require("./models/messageModel");
 const ContenedorMensajesDB = new ContenedorMensajesMongo(messageModel);
 const ContenedorProductosDB = new ContenedorProductosSQL(mysql, "productos");
 
@@ -41,7 +45,16 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: false}));
 app.use(express.static("./views"));
 app.use("/api/productos", productosRoutes);
-
+app.use(cookieParser());
+app.use(session({
+    store: MongoStore.create({
+        mongoUrl: "mongodb+srv://facundoj:Facu2000@cluster0.1w4mu.mongodb.net/desafioAPI?retryWrites=true&w=majority",
+        ttl: 60
+    }),
+    secret: 'mi_secreto',
+    resave: true,
+    saveUninitialized: true
+  }));
 
 /// --- WebSockets
 
@@ -55,7 +68,6 @@ io.on("connection", async (socket) => {
     listaMensajes = {id: "mensajes", mensajes: listaMensajes}
     listaMensajes = normalize(listaMensajes, chatSchema);
     const listaProductos = await ContenedorProductosDB.getAll();
-
 
     socket.emit("mensajeDesdeServer", listaMensajes); ///carga inicial del chat
     socket.emit("productoDesdeServer", listaProductos);
@@ -96,13 +108,47 @@ io.on("connection", async (socket) => {
     
 })
 
+/// --- Funciones auxiliares
+const auth = (req, res, next) =>{
+    if(!req.session.username){
+        res.redirect("/login");
+    }
+    else{
+        return next();
+    }
+}
+
 /// --- Rutas ---
 
-app.get("/", async (req, res) => {
-    res.render("index");
+app.get("/", auth, async (req, res) => {
+
+    res.render("index", {seccion: "form", username: req.session.username});
 });
 
-app.get("/api/productos-test", async (req, res) => {
+app.get("/login", async (req, res) => {
+    res.render("index", {seccion: "login"});
+});
+
+app.get("/logout", auth, async (req, res) => {
+    const username = req.session.username;
+    req.session.destroy(() => {
+        res.render("index", {seccion: "logout", username: username})
+    })
+});
+
+
+app.post("/login/auth", async (req, res) => {
+    //creo las cookies y session
+    req.session.username = req.body.username;
+    res.redirect("/")
+});
+
+app.get("/productos", auth, async (req, res) => {
+    const productos = await ContenedorProductosDB.getAll();
+    res.render("index", {seccion: "productos", data: productos, username: req.session.username});
+})
+
+app.get("/api/productos-test", auth, async (req, res) => {
     const productos = [];
     for(let i = 0; i < 5; i++){
         productos.push({
@@ -114,7 +160,7 @@ app.get("/api/productos-test", async (req, res) => {
     console.log(productos)
 
     // const productos = await ContenedorProd.getAll();
-    res.render("index", {seccion: "productos", data: productos});
+    res.render("index", {seccion: "productos", data: productos, username: req.session.username});
 });
 
 /// --- Inicio del server

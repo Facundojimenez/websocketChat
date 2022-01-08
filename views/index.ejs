@@ -17,23 +17,48 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
+            <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
                     <a class="nav-link" href="/">Cargar productos <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="#cajaProductos">Ver Productos</a>
+                    <a class="nav-link" href="/productos">Ver Productos</a>
                 </li>
             </ul>
+            <% if(seccion !== "login" && seccion !== "logout")  { %>
+                <span>Bienvenido <%= username %></span>
+                <a class="nav-link" href="/logout">
+                    <button class="btn btn-danger">
+                        Cerrar sesion
+                    </button>
+                </a>
+            <% } %>
+            <% if(seccion === "logout")  { %>
+                <a class="nav-link" href="/login">
+                    <button class="btn btn-primary">
+                        Iniciar sesion
+                    </button>
+                </a>
+            <% } %>
         </div>
     </nav>
-
     <div class="container">
         <div class="row">
-            <%- include('./form'); %>
-            <%- include('./productos'); %>
+            <% if(seccion === "productos")  { %>
+                <%- include('./productos'); %>
+            <% } %>
+            <% if(seccion === "form")  { %>
+                <%- include('./form'); %>
+            <% } %>
+            <% if(seccion === "login")  { %>
+                <%- include('./login'); %>
+            <% } %>
+            <% if(seccion === "logout")  { %>
+                <%- include('./logout'); %>
+            <% } %>
         </div>
     </div>
+
     
     
     <script src="https://cdn.jsdelivr.net/npm/normalizr@3.6.1/dist/normalizr.browser.min.js"></script>

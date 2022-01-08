@@ -12,10 +12,10 @@ const chatSchema = new normalizr.schema.Entity("chat", {
 })
 ///
 
-
-while(!userEmail){
-    var userEmail = prompt("Ingrese su email para continuar");
-};
+/// lo quité temporalmente, deshabilitando el chat
+// while(!userEmail){
+//     var userEmail = prompt("Ingrese su email para continuar");
+// };
 
 socket.on("mensajeDesdeServer", (data) => {
     renderMensajes(data);
