@@ -25,18 +25,23 @@
                     <a class="nav-link" href="/productos">Ver Productos</a>
                 </li>
             </ul>
-            <% if(seccion !== "login" && seccion !== "logout")  { %>
-                <span>Bienvenido <%= username %></span>
+            <% if(seccion !== "login" && seccion !== "signUp" && seccion !== "loginError" && seccion !== "signUpError")  { %>
+                <span>Bienvenido <%= user.username %></span>
                 <a class="nav-link" href="/logout">
                     <button class="btn btn-danger">
                         Cerrar sesion
                     </button>
                 </a>
             <% } %>
-            <% if(seccion === "logout")  { %>
+            <% if(seccion === "loginError" || seccion === "signUpError" || seccion === "signUp" || seccion === "login")  { %>
                 <a class="nav-link" href="/login">
                     <button class="btn btn-primary">
                         Iniciar sesion
+                    </button>
+                </a>
+                <a class="nav-link" href="/signUp">
+                    <button class="btn btn-warning">
+                        Registrarse
                     </button>
                 </a>
             <% } %>
@@ -53,7 +58,19 @@
             <% if(seccion === "login")  { %>
                 <%- include('./login'); %>
             <% } %>
+            <% if(seccion === "loginError")  { %>
+                <%- include('./loginError'); %>
+            <% } %>
+            <% if(seccion === "signUpError")  { %>
+                <%- include('./signUpError'); %>
+            <% } %>
+            <% if(seccion === "signUp")  { %>
+                <%- include('./signUp'); %>
+            <% } %>
             <% if(seccion === "logout")  { %>
+                <%- include('./logout'); %>
+            <% } %>
+            <% if(seccion === "success")  { %>
                 <%- include('./logout'); %>
             <% } %>
         </div>

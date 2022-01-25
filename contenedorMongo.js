@@ -26,6 +26,15 @@ module.exports = class ContenedorMongo {
             return {};
         }
     }
+    async getByUsername(_username){
+        try{
+            const elemento = await this.model.find({ username: _username}).exec();
+            return elemento;
+        }
+        catch(err){
+            return {};
+        }
+    }
 
     async save(_elemento){
         const elemento = await _elemento.save();

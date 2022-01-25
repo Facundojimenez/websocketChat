@@ -73,7 +73,6 @@ const renderProductos = (data) => {
 }
 
 const renderMensajes = (data) => {
-    console.log(data)
     data = normalizr.denormalize("mensajes", chatSchema, data.entities)
     console.log(data)
     const htmlMsg = data.mensajes.map(msg => {

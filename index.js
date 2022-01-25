@@ -5,6 +5,12 @@ const {normalize, schema} = require("normalizr");
 var uuid = require('uuid');
 const faker = require("faker");
 
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
@@ -20,14 +26,81 @@ const chatSchema = new schema.Entity("chat", {
     mensajes: [messageSchema]
 })
 
-
 /// --- DB ---
-const ContenedorMensajesMongo = require("./contenedorMongo");
+const ContenedorMongo = require("./contenedorMongo");
 const ContenedorProductosSQL = require("./contenedorDB");
 const mysql = require("./db/mysql");
 const messageModel = require("./models/messageModel");
-const ContenedorMensajesDB = new ContenedorMensajesMongo(messageModel);
+const usersModel = require("./models/usersModel");
+const ContenedorMensajesDB = new ContenedorMongo(messageModel);
+const ContenedorUsuariosDB = new ContenedorMongo(usersModel);
 const ContenedorProductosDB = new ContenedorProductosSQL(mysql, "productos");
+
+// Autenticacion y autorizacion
+
+passport.use("local-login", new LocalStrategy((username, password, done) => {
+    const buscarUser = async (username) =>{
+        const res = await ContenedorUsuariosDB.getByUsername(username);
+        const user = res[0]
+        
+        if(!user){ ///no se encontró el usuario
+            done(null, false);
+            return;
+        }
+
+        bcrypt.compare(password, user.password, function(err, result) {
+            if(!result){ ///no coincide la contraseña
+                done(null, false)
+                return;
+            }
+
+            done(null, user);
+        });
+
+    }
+
+    buscarUser(username)
+}))
+
+passport.use("local-signup", new LocalStrategy({
+    usernameField: "username",
+    passwordField: "password",
+    passReqToCallback: true
+}, (req, username, password, done) => {
+    const buscarUser = async (username) =>{
+        const res = await ContenedorUsuariosDB.getByUsername(username);
+        const user = res[0];
+
+        if(user){ ///el usuario ya existe
+            done(null, false);
+            return;
+        }
+
+        bcrypt.hash(password, saltRounds, async (err, hash) => {
+            const newUser = new usersModel({
+                username,
+                password: hash
+            })
+    
+            const createdUser = await ContenedorUsuariosDB.save(newUser);
+    
+            done(null, createdUser)
+            // Store hash in your password DB.
+        });
+
+    }
+
+    buscarUser(username)
+}))
+
+passport.serializeUser((user, done) => {
+    done(null, user);
+})
+
+passport.deserializeUser(async (_id, done) => {
+    const user = await ContenedorUsuariosDB.getById(_id);
+    done(null, user);
+})
 
 
 const app = express();
@@ -41,8 +114,8 @@ app.set("views", "./views");
 app.set("view engine", "ejs");
 
 /// --- MiddleWares ---
-
 app.use(express.urlencoded({extended: false}));
+app.use(express.json());
 app.use(express.static("./views"));
 app.use("/api/productos", productosRoutes);
 app.use(cookieParser());
@@ -54,7 +127,10 @@ app.use(session({
     secret: 'mi_secreto',
     resave: true,
     saveUninitialized: true
-  }));
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 /// --- WebSockets
 
@@ -110,42 +186,59 @@ io.on("connection", async (socket) => {
 
 /// --- Funciones auxiliares
 const auth = (req, res, next) =>{
-    if(!req.session.username){
-        res.redirect("/login");
+
+    if(req.isAuthenticated()){
+        return next()
     }
-    else{
-        return next();
-    }
+
+    res.redirect("/login")
 }
 
 /// --- Rutas ---
 
 app.get("/", auth, async (req, res) => {
 
-    res.render("index", {seccion: "form", username: req.session.username});
+    console.log(req.session.passport.user)
+    res.render("index", {seccion: "form", user: req.session.passport.user});
 });
 
 app.get("/login", async (req, res) => {
     res.render("index", {seccion: "login"});
 });
 
-app.get("/logout", auth, async (req, res) => {
-    const username = req.session.username;
-    req.session.destroy(() => {
-        res.render("index", {seccion: "logout", username: username})
-    })
+app.get("/login/error", async (req, res) => {
+    res.render("index", {seccion: "loginError"})
 });
 
+app.post("/login/auth", passport.authenticate("local-login", {
+    successRedirect: "/",
+    failureRedirect: "/login/error"
+}), (req, res) => {
 
-app.post("/login/auth", async (req, res) => {
-    //creo las cookies y session
-    req.session.username = req.body.username;
-    res.redirect("/")
+});
+
+app.get("/signup", async (req, res) => {
+    res.render("index", {seccion: "signUp"});
+});
+
+app.get("/signup/error", async (req, res) => {
+
+    res.render("index", {seccion: "signUpError"});
+});
+
+app.post("/signup/auth", passport.authenticate("local-signup", {
+    successRedirect: "/",
+    failureRedirect: "/signup/error"
+}));
+
+app.get("/logout", auth, async (req, res) => {
+    req.logOut();
+    res.redirect("/login")
 });
 
 app.get("/productos", auth, async (req, res) => {
     const productos = await ContenedorProductosDB.getAll();
-    res.render("index", {seccion: "productos", data: productos, username: req.session.username});
+    res.render("index", {seccion: "productos", data: productos, user: req.session.passport.user});
 })
 
 app.get("/api/productos-test", auth, async (req, res) => {
@@ -157,10 +250,9 @@ app.get("/api/productos-test", auth, async (req, res) => {
             thumbnail: faker.image.image(), ///las otras opciones de imagenes de faker no funcionan muy bien, asi que preferi usar imagenes aleatorias
         })
     }
-    console.log(productos)
 
     // const productos = await ContenedorProd.getAll();
-    res.render("index", {seccion: "productos", data: productos, username: req.session.username});
+    res.render("index", {seccion: "productos", data: productos, user: req.session.passport.user});
 });
 
 /// --- Inicio del server
