@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
-const config = require("./config");
+const dotenv = require("dotenv");
+dotenv.config();
 
-mongoose.connect(config.mongodb.connectionString);
+mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
 
 mongoose.connection.on("open", () => {
     console.log("Base de MONGO conectada");

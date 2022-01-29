@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const dotenv = require("dotenv");
+dotenv.config();
 
-const config = require("../config");
-mongoose.connect(config.mongodb.connectionString);
+mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
 
 
 mongoose.connection.on("open", () => {

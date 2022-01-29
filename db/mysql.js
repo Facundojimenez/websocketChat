@@ -1,7 +1,10 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 const knex = require("knex")({
     client: "mysql",
     connection: {
-        host: "127.0.0.1",
+        host: process.env.MYSQL_HOST,
         port: 3306,
         user: "root",
         database: "desafioChat"

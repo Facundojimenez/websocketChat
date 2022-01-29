@@ -1,7 +1,7 @@
 const express = require("express");
 const http = require('http');
 const productosRoutes = require("./routes/productos");
-const {normalize, schema} = require("normalizr");
+const randomsRoutes = require("./routes/randoms");
 var uuid = require('uuid');
 const faker = require("faker");
 
@@ -15,7 +15,23 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 
+
+const dotenv = require("dotenv");
+dotenv.config();
+
+const parseArgs = require('minimist')
+const options = {
+    alias: {
+        p: "port"
+    },
+    default: {
+        port: "3000"
+    }
+}
+const argumentos = parseArgs(process.argv.slice(2), options);
+
 /// --- Esquemas de normalizaciones ---
+const {normalize, schema} = require("normalizr");
 const authorSchema = new schema.Entity("author", {}, {idAttribute: "email"});
 
 const messageSchema = new schema.Entity("message", {
@@ -118,13 +134,14 @@ app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.use(express.static("./views"));
 app.use("/api/productos", productosRoutes);
+app.use("/api/randoms", randomsRoutes);
 app.use(cookieParser());
 app.use(session({
     store: MongoStore.create({
-        mongoUrl: "mongodb+srv://facundoj:Facu2000@cluster0.1w4mu.mongodb.net/desafioAPI?retryWrites=true&w=majority",
+        mongoUrl: process.env.MONGODB_CONNECTION_STRING,
         ttl: 60
     }),
-    secret: 'mi_secreto',
+    secret: process.env.SESSION_SECRET,
     resave: true,
     saveUninitialized: true
 }));
@@ -255,9 +272,25 @@ app.get("/api/productos-test", auth, async (req, res) => {
     res.render("index", {seccion: "productos", data: productos, user: req.session.passport.user});
 });
 
+app.get("/info", async (req, res) => {
+    // argumentos
+    const info = {
+        args: argumentos,
+        plataforma: process.platform,
+        versionNode: process.version,
+        memoriaAsignada: process.memoryUsage,
+        pathEjecucion: process.execPath,
+        pid: process.pid,
+        pathProyecto: process.cwd() 
+
+    }
+    
+    res.send(info)
+})
+
 /// --- Inicio del server
 
-server.listen(port, () => {
-    console.log(`Server corriendo en el puerto ${port}`);
+server.listen(argumentos.port, () => {
+    console.log(`Server corriendo en el puerto ${argumentos.port}`);
 })
 
