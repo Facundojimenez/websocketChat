@@ -5,7 +5,7 @@ dotenv.config();
 mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
 
 mongoose.connection.on("open", () => {
-    console.log("Base de MONGO conectada");
+    // console.log("Base de MONGO conectada");
 })
 
 

@@ -17,7 +17,7 @@ knex.schema.createTableIfNotExists('productos', (table) => {
     table.float('price');
     table.string('thumbnail').defaultTo("https://justmockup.com/wp-content/uploads/edd/2019/08/box-packaging-mockup-free-download.jpg");
 }).then(res => {
-    console.log("Tabla creada exitosamente")
+    // console.log("Tabla creada exitosamente")
 }).catch(err => {
     console.log(err)
 })
